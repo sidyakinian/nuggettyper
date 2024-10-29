@@ -52,6 +52,17 @@ const TypingInput = ({ gameState, input, sentence, handleInputChange }) => {
   );
 };
 
+const Results = ({ time, sentence }) => {
+  const speed = (sentence.length / 5.0) / (time / 60.0);
+
+  return (
+    <div className="results">
+      <p>Finished! Your time: {time.toFixed(2)} seconds</p>
+      <p>Speed: {speed.toFixed(2)} wpm</p>
+    </div>
+  );
+};
+
 const ResetButton = ({ onClick, gameState }) => {
   return (
     <button onClick={onClick} className="reset-button">
@@ -114,6 +125,7 @@ const App = () => {
         handleInputChange={handleInputChange} 
         sentence={sentence} 
       />
+      {gameState === GameState.Finished && <Results time={time} sentence={sentence} />}
       <ResetButton onClick={resetGame} gameState={gameState} />
     </div>
   )
