@@ -2,6 +2,12 @@ import './App.css';
 import { useState } from 'react';
 import { getHighlightedText, getRandomSentence } from './utility';
 
+const GameState = {
+  NotStarted: 'NOT_STARTED',
+  Typing: 'TYPING',
+  Finished: 'FINISHED',
+};
+
 const sentences = [
   "beavers build dams to create safe, stable habitats.",
   "strong teeth allow beavers to cut down trees.",
@@ -23,7 +29,7 @@ const Header = ({ time }) => {
   );
 }
 
-const TypingInput = ({ input, sentence, handleInputChange }) => {
+const TypingInput = ({ gameState, input, sentence, handleInputChange }) => {
   const { correctText, incorrectText } = getHighlightedText(sentence, input);
   const remainingText = sentence ? sentence.slice(input.length) : '';
 
@@ -34,6 +40,7 @@ const TypingInput = ({ input, sentence, handleInputChange }) => {
         value={input}
         onChange={handleInputChange}
         className="visible-input"
+        disabled={gameState === GameState.Finished}
         autoFocus
       />
       <div className="input-feedback">
@@ -45,7 +52,16 @@ const TypingInput = ({ input, sentence, handleInputChange }) => {
   );
 };
 
+const ResetButton = ({ onClick, gameState }) => {
+  return (
+    <button onClick={onClick} className="reset-button">
+      {gameState === GameState.Finished ? 'Play Again' : 'Reset'}
+    </button>
+  );
+}
+
 const App = () => {
+  const [gameState, setGameState] = useState(GameState.NotStarted);
   const [sentence, setSentence] = useState(getRandomSentence(sentences));
   const [input, setInput] = useState('');
   
@@ -56,14 +72,20 @@ const App = () => {
     setInput(value);
   }
 
+  const resetGame = () => {
+    setGameState(GameState.NotStarted);
+  };
+
   return (
     <div className="app">
       <Header time={time} />
       <TypingInput 
+        gameState={gameState}
         input={input} 
         handleInputChange={handleInputChange} 
         sentence={sentence} 
       />
+      <ResetButton onClick={resetGame} gameState={gameState} />
     </div>
   )
 }
