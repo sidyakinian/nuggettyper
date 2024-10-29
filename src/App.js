@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getHighlightedText, getRandomSentence } from './utility';
 
 const GameState = {
@@ -64,12 +64,41 @@ const App = () => {
   const [gameState, setGameState] = useState(GameState.NotStarted);
   const [sentence, setSentence] = useState(getRandomSentence(sentences));
   const [input, setInput] = useState('');
-  
-  var time = 0;
+  const [time, setTime] = useState(0); 
+  const [startTime, setStartTime] = useState(null); 
+
+  useEffect(() => {
+    let interval;
+    if (gameState === GameState.Typing) {
+      if (!startTime) {
+        setStartTime(Date.now());
+      }
+
+      interval = setInterval(() => {
+        const elapsedTime = Date.now() - startTime; 
+        setTime(elapsedTime / 1000); 
+      }, 100); 
+
+    } else if (gameState === GameState.Finished) {
+      clearInterval(interval);
+    } else if (gameState === GameState.NotStarted) {
+      setSentence(getRandomSentence(sentences));
+      setInput('');
+      setTime(0);
+      setStartTime(null); 
+    }
+    return () => clearInterval(interval);
+  }, [gameState, startTime]);
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
+    if (gameState === GameState.NotStarted) {
+      setGameState(GameState.Typing);
+    }
+    if (value === sentence) {
+      setGameState(GameState.Finished);
+    }
   }
 
   const resetGame = () => {
